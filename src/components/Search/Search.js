@@ -4,7 +4,7 @@ import {geolocated} from 'react-geolocated';
 import Map from './Map';
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import SearchBar from "./Searchbar";
+import Searchbar from './Searchbar';
 
 class Search extends React.Component {
   state = {
@@ -20,7 +20,7 @@ class Search extends React.Component {
       <div className={"Search"}>
         <Row>
           <Col sm={4}>
-            <SearchBar/>
+            <Searchbar/>
           </Col>
           <Col sm={8}>
             {!this.props.isGeolocationAvailable ? <div>No support</div>

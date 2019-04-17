@@ -1,153 +1,102 @@
 import React from 'react';
-import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import { classnames } from './helpers';
+import {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
 
-class SearchBar extends React.Component {
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var formattedSuggestion = function formattedSuggestion(structured_formatting) {
+  return {
+    mainText: structured_formatting.main_text,
+    secondaryText: structured_formatting.secondary_text
+  };
+};
+
+class Searchbar extends React.Component {
+  state = {
+    suggestions: []
+  }
   constructor(props) {
     super(props);
-    this.state = {
-      address: '',
-      errorMessage: '',
-      latitude: null,
-      longitude: null,
-      isGeocoding: false,
-    };
+
+    if (!window.google) {
+      throw new Error('[react-places-autocomplete]: Google Maps JavaScript API library must be loaded. See: https://github.com/kenny-hibino/react-places-autocomplete#load-google-library');
+    }
+
+    if (!window.google.maps.places) {
+      throw new Error('[react-places-autocomplete]: Google Maps Places library must be loaded. Please add `libraries=places` to the src URL. See: https://github.com/kenny-hibino/react-places-autocomplete#load-google-library');
+    }
+    this.autocompleteService = new window.google.maps.places.AutocompleteService();
   }
 
-  handleChange = address => {
-    this.setState({
-      address,
-      latitude: null,
-      longitude: null,
-      errorMessage: '',
-    });
+  componentDidMount() {
+    this.autocompleteService.getPlacePredictions(_extends({}, {}, {
+      input: "urgentcare"
+    }), this.autocompleteCallback);
+  }
+
+  getPosition = (selected) => {
+    return geocodeByAddress(selected)
   };
 
-  handleSelect = selected => {
-    this.setState({ isGeocoding: true, address: selected });
-    geocodeByAddress(selected)
-      .then(res => getLatLng(res[0]))
-      .then(({ lat, lng }) => {
-        this.setState({
-          latitude: lat,
-          longitude: lng,
-          isGeocoding: false,
-        });
+  autocompleteCallback = (predictions, status) => {
+    this.setState({
+      suggestions: predictions.map(function (p, idx) {
+        return {
+          id: p.id,
+          description: p.description,
+          placeId: p.place_id,
+          active: false,
+          index: idx,
+          formattedSuggestion: formattedSuggestion(p.structured_formatting),
+          matchedSubstrings: p.matched_substrings,
+          terms: p.terms,
+          types: p.types
+        };
       })
-      .catch(error => {
-        this.setState({ isGeocoding: false });
-        console.log('error', error); // eslint-disable-line no-console
-      });
-  };
-
-  handleCloseClick = () => {
-    this.setState({
-      address: '',
-      latitude: null,
-      longitude: null,
+    }, () => {
+      let promises = this.state.suggestions.map((sug, i) =>
+        this.getPosition(this.state.suggestions[i].description, i));
+      Promise
+        .all(promises)
+        .then( (result) => {
+          let locations = [];
+          result.forEach((res, _) => {
+            locations.push(getLatLng(res[0]));
+          });
+          Promise
+            .all(locations)
+            .then(res => {
+              let suggestions = [...this.state.suggestions];
+              res.forEach(({lat, lng}, i) => {
+                suggestions[i] = {
+                  ...suggestions[i],
+                  latitude: lat,
+                  longitude: lng
+                }
+              });
+              this.setState({suggestions})
+            })
+        })
+        .catch( (err) => {
+          console.log(err)
+        });
     });
   };
 
-  handleError = (status, clearSuggestions) => {
-    console.log('Error from Google Maps API', status); // eslint-disable-line no-console
-    this.setState({ errorMessage: status }, () => {
-      clearSuggestions();
-    });
-  };
 
   render() {
-    const {
-      address,
-      errorMessage,
-      latitude,
-      longitude,
-      isGeocoding,
-    } = this.state;
-
     return (
       <div>
-        <PlacesAutocomplete
-          onChange={this.handleChange}
-          value={address}
-          onSelect={this.handleSelect}
-          onError={this.handleError}
-          shouldFetchSuggestions={address.length > 2}
-        >
-          {({ getInputProps, suggestions, getSuggestionItemProps }) => {
+        <h1>Urgent Care Facilities</h1>
+        <ul>
+          {this.state.suggestions.map((sug, _) => {
             return (
-              <div className="Demo__search-bar-container">
-                <div className="Demo__search-input-container">
-                  <input
-                    {...getInputProps({
-                      placeholder: 'Search Places...',
-                      className: 'Demo__search-input',
-                    })}
-                  />
-                  {this.state.address.length > 0 && (
-                    <button
-                      className="Demo__clear-button"
-                      onClick={this.handleCloseClick}
-                    >
-                      x
-                    </button>
-                  )}
-                </div>
-                {suggestions.length > 0 && (
-                  <div className="Demo__autocomplete-container">
-                    {suggestions.map(suggestion => {
-                      const className = classnames('Demo__suggestion-item', {
-                        'Demo__suggestion-item--active': suggestion.active,
-                      });
-
-                      return (
-                        /* eslint-disable react/jsx-key */
-                        <div
-                          {...getSuggestionItemProps(suggestion, { className })}
-                        >
-                          <strong>
-                            {suggestion.formattedSuggestion.mainText}
-                          </strong>{' '}
-                          <small>
-                            {suggestion.formattedSuggestion.secondaryText}
-                          </small>
-                        </div>
-                      );
-                      /* eslint-enable react/jsx-key */
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          }}
-        </PlacesAutocomplete>
-        {errorMessage.length > 0 && (
-          <div className="Demo__error-message">{this.state.errorMessage}</div>
-        )}
-
-        {((latitude && longitude) || isGeocoding) && (
-          <div>
-            <h3 className="Demo__geocode-result-header">Geocode result</h3>
-            {isGeocoding ? (
-              <div>
-                <i className="fa fa-spinner fa-pulse fa-3x fa-fw Demo__spinner" />
-              </div>
-            ) : (
-              <div>
-                <div className="Demo__geocode-result-item--lat">
-                  <label>Latitude:</label>
-                  <span>{latitude}</span>
-                </div>
-                <div className="Demo__geocode-result-item--lng">
-                  <label>Longitude:</label>
-                  <span>{longitude}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+              <li>{sug.description}</li>
+            )
+          })}
+        </ul>
       </div>
-    );
+    )
   }
 }
 
-export default SearchBar;
+export default Searchbar;
