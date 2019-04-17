@@ -56,7 +56,14 @@ class MapContainer extends React.Component {
       >
         <Marker
           title={'The marker`s title will appear as a tooltip.'}
-          name={'Your current location'}/>
+          name={'Your current location'}>
+          <InfoWindow
+            visible={true}>
+            <div>
+              <h1>Click on the map or drag the marker to select location where the incident occurred</h1>
+            </div>
+          </InfoWindow>
+        </Marker>
         {markers}
       </Map>
     )
