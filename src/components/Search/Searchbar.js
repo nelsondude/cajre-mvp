@@ -51,14 +51,11 @@ class Searchbar extends React.Component {
       })
     }, () => {
       let promises = this.state.suggestions.map((sug, i) =>
-        geocodeByAddress(this.state.suggestions[i].description, i));
+        geocodeByAddress(sug.description, i));
       Promise
         .all(promises)
         .then( (result) => {
-          let locations = [];
-          result.forEach((res, _) => {
-            locations.push(getLatLng(res[0]));
-          });
+          let locations = result.map((res, _) => (getLatLng(res[0])));
           Promise
             .all(locations)
             .then(res => {
@@ -71,6 +68,7 @@ class Searchbar extends React.Component {
                 }
               });
               this.setState({suggestions})
+              this.props.handleSuggestions([...suggestions]);
             })
         })
         .catch( (err) => {
@@ -85,9 +83,9 @@ class Searchbar extends React.Component {
       <div>
         <h1>Urgent Care Facilities</h1>
         <ul>
-          {this.state.suggestions.map((sug, _) => {
+          {this.state.suggestions.map((sug, i) => {
             return (
-              <li>{sug.description}</li>
+              <li key={i}>{sug.description}</li>
             )
           })}
         </ul>

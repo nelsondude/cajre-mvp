@@ -8,26 +8,32 @@ import Searchbar from './Searchbar';
 
 class Search extends React.Component {
   state = {
-    search_input: ""
+    search_input: "",
+    suggestions: []
   };
 
   handleChange = (event) => {
     this.setState({search_input: event.target.value});
   };
 
+  handleSuggestions = (suggestions) => {
+    console.log(suggestions);
+    this.setState({suggestions})
+  }
+
   render() {
     return (
       <div className={"Search"}>
         <Row>
           <Col sm={4}>
-            <Searchbar/>
+            <Searchbar handleSuggestions={this.handleSuggestions}/>
           </Col>
           <Col sm={8}>
             {!this.props.isGeolocationAvailable ? <div>No support</div>
               : !this.props.isGeolocationEnabled
                 ? <div>Geo location not enabled</div>
                 : this.props.coords ?
-                    <Map lat={this.props.coords.latitude} long={this.props.coords.longitude} />
+                    <Map markers={this.state.suggestions} lat={this.props.coords.latitude} long={this.props.coords.longitude} />
                   : <div>Loading data ...</div>}
           </Col>
         </Row>

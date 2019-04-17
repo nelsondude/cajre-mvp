@@ -28,6 +28,15 @@ class MapContainer extends React.Component {
         <Marker
           title={'The marker`s title will appear as a tooltip.'}
           name={'Your current location'}/>
+        {this.props.markers.map((marker, i) => {
+          return (
+            <Marker
+              key={i}
+              title={marker.description}
+              name={marker.description}
+              position={{lat: marker.latitude, lng: marker.longitude}}/>
+          )
+        })}
       </Map>
     )
   }
