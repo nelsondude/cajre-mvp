@@ -33,9 +33,6 @@ class Searchbar extends React.Component {
     }), this.autocompleteCallback);
   }
 
-  getPosition = (selected) => {
-    return geocodeByAddress(selected)
-  };
 
   autocompleteCallback = (predictions, status) => {
     this.setState({
@@ -54,7 +51,7 @@ class Searchbar extends React.Component {
       })
     }, () => {
       let promises = this.state.suggestions.map((sug, i) =>
-        this.getPosition(this.state.suggestions[i].description, i));
+        geocodeByAddress(this.state.suggestions[i].description, i));
       Promise
         .all(promises)
         .then( (result) => {
