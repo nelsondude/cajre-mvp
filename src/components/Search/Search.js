@@ -9,7 +9,8 @@ import Searchbar from './Searchbar';
 class Search extends React.Component {
   state = {
     search_input: "",
-    suggestions: []
+    suggestions: [],
+    hover_item: null
   };
 
   handleChange = (event) => {
@@ -17,8 +18,11 @@ class Search extends React.Component {
   };
 
   handleSuggestions = (suggestions) => {
-    console.log(suggestions);
     this.setState({suggestions})
+  };
+
+  handleHoverChange = (index) => {
+    this.setState({hover_item: index})
   }
 
   render() {
@@ -26,14 +30,21 @@ class Search extends React.Component {
       <div className={"Search"}>
         <Row>
           <Col sm={4}>
-            <Searchbar handleSuggestions={this.handleSuggestions}/>
+            <Searchbar
+              handleSuggestions={this.handleSuggestions}
+              handleHover={this.handleHoverChange}
+            />
           </Col>
           <Col sm={8}>
             {!this.props.isGeolocationAvailable ? <div>No support</div>
               : !this.props.isGeolocationEnabled
                 ? <div>Geo location not enabled</div>
                 : this.props.coords ?
-                    <Map markers={this.state.suggestions} lat={this.props.coords.latitude} long={this.props.coords.longitude} />
+                    <Map
+                      markers={this.state.suggestions}
+                      hover_item={this.state.hover_item}
+                      lat={this.props.coords.latitude}
+                      long={this.props.coords.longitude} />
                   : <div>Loading data ...</div>}
           </Col>
         </Row>

@@ -77,6 +77,16 @@ class Searchbar extends React.Component {
     });
   };
 
+  mouseEnter = (i) => {
+    this.setState({hover_item: i});
+    this.props.handleHover(i);
+  };
+
+  mouseLeave = () => {
+    this.setState({hover_item: null});
+    this.props.handleHover(null);
+  };
+
 
   render() {
     return (
@@ -85,7 +95,7 @@ class Searchbar extends React.Component {
         <ul>
           {this.state.suggestions.map((sug, i) => {
             return (
-              <li key={i}>{sug.description}</li>
+              <li key={i} onMouseEnter={() => this.mouseEnter(i)} onMouseLeave={this.mouseLeave}>{sug.description}</li>
             )
           })}
         </ul>

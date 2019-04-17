@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
+import {InfoWindow} from "react-google-maps";
 
 const API_KEY = "AIzaSyBvcyICHXe_ScUzN_RPQcitxOIsDSNNYkE";
 const MAP_URL = `https://maps.googleapis.com/maps/api/js?v=3.exp&key=${API_KEY}&libraries=places,geometry,drawing`;
@@ -10,33 +11,53 @@ const mapStyles = {
 };
 
 class MapContainer extends React.Component {
-  componentDidMount() {
+  state = {
+    markers: []
+  };
 
+  componentWillMount() {
+    this.setState({
+      markers: 2
+    })
+  }
+
+  onMarkerClick = (props, marker, e) => {
+    // console.log(marker);
   }
 
   render() {
+    const lat = this.props.hover_item != null ? this.props.markers[this.props.hover_item].latitude : this.props.lat;
+    const long = this.props.hover_item != null ? this.props.markers[this.props.hover_item].longitude : this.props.long;
+
+    let markers = this.props.markers.map((marker, i) => {
+      return (
+        <Marker
+          key={i}
+          onClick={this.onMarkerClick}
+          title={marker.description}
+          name={marker.description}
+          position={{lat: marker.latitude, lng: marker.longitude}}/>
+      )
+    });
+
     return (
       <Map
         google={this.props.google}
         zoom={14}
         style={mapStyles}
+        center={{
+          lat: lat,
+          lng: long,
+        }}
         initialCenter={{
           lat: this.props.lat,
-          lng: this.props.long
+          lng: this.props.long,
         }}
       >
         <Marker
           title={'The marker`s title will appear as a tooltip.'}
           name={'Your current location'}/>
-        {this.props.markers.map((marker, i) => {
-          return (
-            <Marker
-              key={i}
-              title={marker.description}
-              name={marker.description}
-              position={{lat: marker.latitude, lng: marker.longitude}}/>
-          )
-        })}
+        {markers}
       </Map>
     )
   }
