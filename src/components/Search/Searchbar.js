@@ -7,14 +7,13 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import TextField from "@material-ui/core/TextField";
-import MenuItem from "@material-ui/core/MenuItem";
 import Paper from '@material-ui/core/Paper';
-import Chip from '@material-ui/core/Chip';
-import CancelIcon from '@material-ui/icons/Cancel';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import classNames from 'classnames';
 import Select from 'react-select';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 import data from './data';
+import Divider from "@material-ui/core/Divider";
 
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -24,6 +23,33 @@ var formattedSuggestion = function formattedSuggestion(structured_formatting) {
     mainText: structured_formatting.main_text,
     secondaryText: structured_formatting.secondary_text
   };
+};
+
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+})
+
+var shuffle = function (array) {
+
+  var currentIndex = array.length;
+  var temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+
 };
 
 String.prototype.toProperCase = function () {
@@ -135,6 +161,17 @@ const components = {
   Placeholder,
 };
 
+const getTreatments = () => {
+  let treatments = shuffle(data.treatments.slice()).slice(0, 4);
+  return treatments.map((treatment, i) => {
+    return {
+      name: treatment.toProperCase(),
+      cost: formatter.format(Math.random() * 1000)
+    }
+  })
+};
+
+
 class Searchbar extends React.Component {
   state = {
     suggestions: [],
@@ -175,7 +212,8 @@ class Searchbar extends React.Component {
           formattedSuggestion: formattedSuggestion(p.structured_formatting),
           matchedSubstrings: p.matched_substrings,
           terms: p.terms,
-          types: p.types
+          types: p.types,
+          treatments: getTreatments()
         };
       })
     }, () => {
@@ -269,22 +307,33 @@ class Searchbar extends React.Component {
         <h1>Urgent Care Facilities Near Me</h1>
         <br/>
         <br/>
-        {this.state.suggestions.map((sug, i) => {
+        {this.state.single ? this.state.suggestions.map((sug, i) => {
           return (
             <ExpansionPanel key={i} expanded={expanded === `panel${i}`} onChange={this.handleChange(`panel${i}`, i)}>
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
                 <Typography>{sug.description}</Typography>
               </ExpansionPanelSummary>
-              <ExpansionPanelDetails>
+              <ExpansionPanelDetails style={{display: 'block'}}>
                 <Typography>
                   Price information about the current urgent care center for the <b>searched</b> treatment.
+                  <br/>
+                  <br/>
                   {/*<li key={i} onMouseEnter={() => this.mouseEnter(i)}*/}
                   {/*    onMouseLeave={this.mouseLeave}>{sug.description}</li>*/}
                 </Typography>
+                <Divider/>
+                <List>
+                  {sug.treatments.map((treatment, i) => {
+                    return (
+
+                      <ListItem button>{treatment.name} : <span>{treatment.cost}</span></ListItem>
+                    )
+                  })}
+                </List>
               </ExpansionPanelDetails>
             </ExpansionPanel>
           )
-        })}
+        }) : <h4>Search for a condition to see relevant medical centers.</h4>}
       </div>
     )
   }
