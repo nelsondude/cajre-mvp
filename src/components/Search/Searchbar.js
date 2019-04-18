@@ -260,7 +260,7 @@ class Searchbar extends React.Component {
             components={components}
             value={this.state.single}
             onChange={this.handleChangeInput('single')}
-            placeholder="Search a country (start with a)"
+            placeholder="&nbsp;&nbsp;Search for your condition"
             isClearable
           />
         </div>
