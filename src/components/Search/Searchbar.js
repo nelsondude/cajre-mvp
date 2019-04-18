@@ -197,7 +197,7 @@ class Searchbar extends React.Component {
 
   componentDidMount() {
     this.autocompleteService.getPlacePredictions(_extends({}, {}, {
-      input: "urgentcare"
+      input: "urgent care"
     }), this.autocompleteCallback);
   }
 
