@@ -1,9 +1,8 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import {InfoWindow} from "react-google-maps";
 
 const API_KEY = "AIzaSyBvcyICHXe_ScUzN_RPQcitxOIsDSNNYkE";
-const MAP_URL = `https://maps.googleapis.com/maps/api/js?v=3.exp&key=${API_KEY}&libraries=places,geometry,drawing`;
 
 const mapStyles = {
   width: '100%',
