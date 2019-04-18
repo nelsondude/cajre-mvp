@@ -14,6 +14,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import data from './data';
 import Divider from "@material-ui/core/Divider";
+import Switch from '@material-ui/core/Switch';
 
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -29,7 +30,7 @@ const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   minimumFractionDigits: 2
-})
+});
 
 var shuffle = function (array) {
 
@@ -177,7 +178,8 @@ class Searchbar extends React.Component {
     suggestions: [],
     expanded: null,
     single: null,
-    multi: null
+    multi: null,
+    switch_checked: false
   };
 
   constructor(props) {
@@ -269,6 +271,10 @@ class Searchbar extends React.Component {
     });
   };
 
+  handleSwitch = (event, checked) => {
+    this.setState({switch_checked: checked});
+  };
+
 
   render() {
     const { classes, theme } = this.props;
@@ -303,12 +309,14 @@ class Searchbar extends React.Component {
           />
         </div>
         <br/>
+        <span>Show All Results</span>
+        <Switch checked={this.state.switch_checked} onChange={this.handleSwitch}/>
         <br/>
         <h1>Urgent Care Facilities Near Me</h1>
         <br/>
         <br/>
-        {this.state.single ? this.state.suggestions.map((sug, i) => {
-          return (JSON.stringify(sug).toLowerCase().includes(this.state.single.label.toLowerCase()) ?
+        {this.state.single || this.state.switch_checked ? this.state.suggestions.map((sug, i) => {
+          return (this.state.switch_checked || JSON.stringify(sug).toLowerCase().includes(this.state.single.label.toLowerCase()) ?
             <ExpansionPanel key={i} expanded={expanded === `panel${i}`} onChange={this.handleChange(`panel${i}`, i)}>
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
                 <Typography>{sug.description}</Typography>
@@ -324,7 +332,7 @@ class Searchbar extends React.Component {
                 <Divider/>
                 <List>
                   {sug.treatments.map((treatment, i) => {
-                    return (treatment.name.toLowerCase().includes(this.state.single.label.toLowerCase()) ?
+                    return (this.state.switch_checked || treatment.name.toLowerCase().includes(this.state.single.label.toLowerCase()) ?
 
                       <ListItem button>{treatment.name} : <span>{treatment.cost}</span></ListItem> : null
                     )
