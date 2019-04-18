@@ -308,7 +308,7 @@ class Searchbar extends React.Component {
         <br/>
         <br/>
         {this.state.single ? this.state.suggestions.map((sug, i) => {
-          return (
+          return (JSON.stringify(sug).toLowerCase().includes(this.state.single.label.toLowerCase()) ?
             <ExpansionPanel key={i} expanded={expanded === `panel${i}`} onChange={this.handleChange(`panel${i}`, i)}>
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
                 <Typography>{sug.description}</Typography>
@@ -324,14 +324,14 @@ class Searchbar extends React.Component {
                 <Divider/>
                 <List>
                   {sug.treatments.map((treatment, i) => {
-                    return (
+                    return (treatment.name.toLowerCase().includes(this.state.single.label.toLowerCase()) ?
 
-                      <ListItem button>{treatment.name} : <span>{treatment.cost}</span></ListItem>
+                      <ListItem button>{treatment.name} : <span>{treatment.cost}</span></ListItem> : null
                     )
                   })}
                 </List>
               </ExpansionPanelDetails>
-            </ExpansionPanel>
+            </ExpansionPanel> : null
           )
         }) : <h4>Search for a condition to see relevant medical centers.</h4>}
       </div>
