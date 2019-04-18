@@ -1,84 +1,16 @@
 {
-  "locations": [
+  "pricing": [
     {
-      "name": "Concentra Urgent Care",
-      "latitude": 40.4447559,
-      "longitude": -79.9560047,
-      "treatments": [
-        {
-          "name": "Broken Leg",
-          "costs": [
-            {
-              "provider": "Giant Eagle",
-              "cost": 123.12
-            },
-            {
-              "provider": "Stop n Shop",
-              "cost": 143.12
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "MedExpress",
-      "latitude": 40.4447559,
-      "longitude": -79.9560047,
-      "treatments": [
-        {
-          "name": "Broken Leg",
-          "costs": [
-            {
-              "provider": "Giant Eagle",
-              "cost": 123.12
-            },
-            {
-              "provider": "Stop n Shop",
-              "cost": 143.12
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "UPMC",
-      "latitude": 1,
-      "longitude": 1,
-      "treatments": [
-        {
-          "name": "Broken Leg",
-          "costs": [
-            {
-              "provider": "Giant Eagle",
-              "cost": 123.12
-            },
-            {
-              "provider": "Stop n Shop",
-              "cost": 143.12
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "UPMC",
-      "latitude": 1,
-      "longitude": 1,
-      "treatments": [
-        {
-          "name": "Broken Leg",
-          "costs": [
-            {
-              "provider": "Giant Eagle",
-              "cost": 123.12
-            },
-            {
-              "provider": "Stop n Shop",
-              "cost": 143.12
-            }
-          ]
-        }
-      ]
+      "company": "Giant Eagle",
+      "price": 420
     }
+  ],
+  "treatments": [
+    "broken knee",
+    "xray",
+    "mri",
+    "cat scan",
+    "surgery",
+    "wisdom teeth removal"
   ]
 }

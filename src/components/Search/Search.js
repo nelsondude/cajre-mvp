@@ -29,13 +29,13 @@ class Search extends React.Component {
     return (
       <div className={"Search"}>
         <Row>
-          <Col sm={4}>
+          <Col sm={6}>
             <Searchbar
               handleSuggestions={this.handleSuggestions}
               handleHover={this.handleHoverChange}
             />
           </Col>
-          <Col sm={8}>
+          <Col sm={6}>
             {!this.props.isGeolocationAvailable ? <div>No support</div>
               : !this.props.isGeolocationEnabled
                 ? <div>Geo location not enabled</div>
