@@ -1,57 +1,21 @@
 import React from 'react';
 import {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
 import { withStyles } from '@material-ui/core/styles';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import TextField from "@material-ui/core/TextField";
 import Paper from '@material-ui/core/Paper';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import Select from 'react-select';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
 import data from './data';
-import Divider from "@material-ui/core/Divider";
 import Switch from '@material-ui/core/Switch';
+import {_extends, formatter, shuffle, formattedSuggestion} from "./utils"
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import * as _ from 'lodash';
 
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var formattedSuggestion = function formattedSuggestion(structured_formatting) {
-  return {
-    mainText: structured_formatting.main_text,
-    secondaryText: structured_formatting.secondary_text
-  };
-};
-
-const formatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2
-});
-
-var shuffle = function (array) {
-
-  var currentIndex = array.length;
-  var temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-
-};
 
 String.prototype.toProperCase = function () {
   return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -112,6 +76,12 @@ const styles = theme => ({
   divider: {
     height: theme.spacing.unit * 2,
   },
+  table: {
+    width: '100%'
+  },
+  ul: {
+    padding: 0
+  }
 });
 
 function inputComponent({ inputRef, ...props }) {
@@ -163,11 +133,11 @@ const components = {
 };
 
 const getTreatments = () => {
-  let treatments = shuffle(data.treatments.slice()).slice(0, 4);
+  let treatments = shuffle(data.treatments.slice()).slice(0, 8);
   return treatments.map((treatment, i) => {
     return {
       name: treatment.toProperCase(),
-      cost: formatter.format(Math.random() * 1000)
+      cost: Math.random() * 1000
     }
   })
 };
@@ -246,24 +216,8 @@ class Searchbar extends React.Component {
     });
   };
 
-  mouseEnter = (i) => {
-    this.setState({hover_item: i});
-    this.props.handleHover(i);
-  };
-
-  mouseLeave = () => {
-    this.setState({hover_item: null});
-    this.props.handleHover(null);
-  };
-
-
-  handleChange = (panel, i) => (event, expanded) => {
-    this.setState({
-      expanded: expanded ? panel : false,
-    });
-    this.setState({hover_item: expanded ? i : null});
-    this.props.handleHover(expanded ? i : null);
-  };
+  // this.props.handleHover(expanded ? i : null);
+  // this.setState({hover_item: expanded ? i : null});
 
   handleChangeInput = name => value => {
     this.setState({
@@ -275,10 +229,21 @@ class Searchbar extends React.Component {
     this.setState({switch_checked: checked});
   };
 
+  getBenefits = (index) => {
+    if (index === 0) {
+      return ['No <b>$200</b> deductible', '<b>$50</b> Amazon Gift Card']
+    } else if (index === 1) {
+      return ['No <b>$200</b> deductible']
+    } else if (index === 2) {
+      return ['Only pay <b>50%</b> of deductible', '<b>$25</b> Amazon Gift Card']
+    } else {
+      return []
+    }
+  };
+
 
   render() {
     const { classes, theme } = this.props;
-    const { expanded } = this.state;
 
     const selectStyles = {
       input: base => ({
@@ -289,6 +254,19 @@ class Searchbar extends React.Component {
         },
       }),
     };
+
+    const sorted_treatments = _.filter(
+      _.sortBy(
+        _.flattenDeep(
+          this.state.suggestions.map((sug, index) => {
+            return sug.treatments.map((treatment, j) => {
+              return {index, treatment}
+            })
+          })), [o => (
+          o.treatment.cost  // sort by the cost
+        )]), o => (
+        o.treatment.name.match(new RegExp(this.state.single ? `^${this.state.single.label}$` : '', 'i'))  // filter by the selected disease
+      ));
 
     return (
       <div>
@@ -315,33 +293,36 @@ class Searchbar extends React.Component {
         <h1>Urgent Care Facilities Near Me</h1>
         <br/>
         <br/>
-        {this.state.single || this.state.switch_checked ? this.state.suggestions.map((sug, i) => {
-          return (this.state.switch_checked || JSON.stringify(sug).toLowerCase().includes(this.state.single.label.toLowerCase()) ?
-            <ExpansionPanel key={i} expanded={expanded === `panel${i}`} onChange={this.handleChange(`panel${i}`, i)}>
-              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-                <Typography>{sug.description}</Typography>
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails style={{display: 'block'}}>
-                <Typography>
-                  Price information about the current urgent care center for the <b>searched</b> treatment.
-                  <br/>
-                  <br/>
-                  {/*<li key={i} onMouseEnter={() => this.mouseEnter(i)}*/}
-                  {/*    onMouseLeave={this.mouseLeave}>{sug.description}</li>*/}
-                </Typography>
-                <Divider/>
-                <List>
-                  {sug.treatments.map((treatment, i) => {
-                    return (this.state.switch_checked || treatment.name.toLowerCase().includes(this.state.single.label.toLowerCase()) ?
+        <Paper>
+          <Table className={classes.table}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Treatment</TableCell>
+                <TableCell>Location</TableCell>
+                <TableCell>Cost</TableCell>
+                <TableCell>Benefits If Chosen</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sorted_treatments.map((o, i) => (
+                <TableRow key={i}>
+                  <TableCell component="th" scope="row">
+                    {o.treatment.name}
+                  </TableCell>
+                  <TableCell>{this.state.suggestions[o.index].terms[0].value}</TableCell>
+                  <TableCell>{formatter.format(o.treatment.cost)}</TableCell>
+                  <TableCell>
+                    {this.getBenefits(i).length > 0 ?
+                      <ul className={classes.ul}>
+                        {this.getBenefits(i).map(b => <li dangerouslySetInnerHTML={{__html: b}}/>)}
+                      </ul> : 'No benefits available.'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
 
-                      <ListItem button>{treatment.name} : <span>{treatment.cost}</span></ListItem> : null
-                    )
-                  })}
-                </List>
-              </ExpansionPanelDetails>
-            </ExpansionPanel> : null
-          )
-        }) : <h4>Search for a condition to see relevant medical centers.</h4>}
       </div>
     )
   }
