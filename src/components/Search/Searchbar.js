@@ -216,8 +216,10 @@ class Searchbar extends React.Component {
     });
   };
 
-  // this.props.handleHover(expanded ? i : null);
-  // this.setState({hover_item: expanded ? i : null});
+  handleLocationChange = (i) => {
+    this.props.handleHover(i);
+  }
+
 
   handleChangeInput = name => value => {
     this.setState({
@@ -309,10 +311,10 @@ class Searchbar extends React.Component {
                   <TableCell component="th" scope="row">
                     {o.treatment.name}
                   </TableCell>
-                  <TableCell>{this.state.suggestions[o.index].terms[0].value}</TableCell>
+                  <TableCell className={'location'} onClick={() => this.handleLocationChange(o.index)}>{this.state.suggestions[o.index].terms[0].value}</TableCell>
                   <TableCell>{formatter.format(o.treatment.cost)}</TableCell>
                   <TableCell>
-                    {this.getBenefits(i).length > 0 ?
+                    {this.state.single === null ? (i === 0 ? 'Choose treatment to see benefits' : "") : this.getBenefits(i).length > 0 ?
                       <ul className={classes.ul}>
                         {this.getBenefits(i).map(b => <li dangerouslySetInnerHTML={{__html: b}}/>)}
                       </ul> : 'No benefits available.'}

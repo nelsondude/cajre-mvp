@@ -1,4 +1,10 @@
 
 .App {
     padding-top: 10px;
+    padding-left: 30px;
+    padding-right: 50px;
+}
+
+.location:hover {
+    cursor: pointer;
 }

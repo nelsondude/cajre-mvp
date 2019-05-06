@@ -1,6 +1,5 @@
 import React from 'react';
-import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
-import {InfoWindow} from "react-google-maps";
+import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 
 const API_KEY = "AIzaSyBvcyICHXe_ScUzN_RPQcitxOIsDSNNYkE";
 
@@ -11,18 +10,34 @@ const mapStyles = {
 
 class MapContainer extends React.Component {
   state = {
-    markers: []
+    markers: [],
+    showingInfoWindow: false,
+    activeMarker: {},
+    selectedPlace: {},
   };
 
   componentWillMount() {
-    this.setState({
-      markers: 2
-    })
+    // this.setState({
+    //   markers: 2
+    // })
   }
 
   onMarkerClick = (props, marker, e) => {
-    // console.log(marker);
+    this.setState({
+      selectedPlace: props,
+      activeMarker: marker,
+      showingInfoWindow: true
+    });
   }
+
+  onMapClicked = (props) => {
+    if (this.state.showingInfoWindow) {
+      this.setState({
+        showingInfoWindow: false,
+        activeMarker: null
+      })
+    }
+  };
 
   render() {
     const lat = this.props.hover_item != null ? this.props.markers[this.props.hover_item].latitude : this.props.lat;
@@ -55,15 +70,18 @@ class MapContainer extends React.Component {
       >
         <Marker
           title={'The marker`s title will appear as a tooltip.'}
-          name={'Your current location'}>
-          <InfoWindow
-            visible={true}>
-            <div>
-              <h1>Click on the map or drag the marker to select location where the incident occurred</h1>
-            </div>
-          </InfoWindow>
+          name={'Your current location'}
+          onClick={this.onMarkerClick}
+        >
         </Marker>
         {markers}
+        <InfoWindow
+          marker={this.state.activeMarker}
+          visible={true}>
+          <div>
+            <h6>{this.state.selectedPlace.name}</h6>
+          </div>
+        </InfoWindow>
       </Map>
     )
   }
